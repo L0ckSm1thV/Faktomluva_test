@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Faktomluva – test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: vzdělávací, svižný, laskavě překvapivý – jako Roslingova přednáška
+   IDEA: hlasovací karta z přednášky + barevné regiony Gapminder bublin
+   PICTURE: velká karta otázky s A/B/C, ve výsledcích pruhy „ty vs. šimpanz“
+   COLOUR & TYPE: tmavě tyrkysová dominanta, bílý podklad, čtyři regionální barvy jako akcent; Figtree
+   LAYOUT: jeden sloupec do 760px, test → souhrn → vysvětlení */
+:root{color-scheme:light dark;
+ --bg:light-dark(#ffffff,#0b1a20);--ink:light-dark(#102027,#e8f1f3);--mut:light-dark(#4d6169,#9fb4ba);
+ --main:light-dark(#0b6e80,#1aa3b8);--soft:light-dark(#e6f4f6,#12303a);--line:light-dark(#cfe2e6,#24434d);
+ --ok:light-dark(#1f8a4c,#4cc983);--okb:light-dark(#e5f5ec,#123323);--bad:light-dark(#c4362c,#ff7a6e);--badb:light-dark(#fcebea,#3a1714);
+ --r1:#00b8d4;--r2:#7fd13b;--r3:#ff5a5f;--r4:#ffd23f}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Figtree,system-ui,sans-serif;overflow-x:clip}
+.top{background:var(--main);color:#fff;padding:clamp(24px,4vw,48px) max(5vw,16px) clamp(20px,3vw,32px);position:relative;overflow:hidden}
+.top h1{font-size:clamp(32px,6vw,48px);line-height:1.05;margin:0 0 8px;text-wrap:balance;font-weight:800}
+.top p{margin:0;max-width:60ch;opacity:.92}
+.dots{position:absolute;right:max(5vw,16px);top:50%;transform:translateY(-50%);display:flex;gap:10px;pointer-events:none}
+.dots i{display:block;border-radius:50%;opacity:.9}
+@media(max-width:700px){.dots{display:none}}
+main{max-width:760px;margin:0 auto;padding:clamp(20px,4vw,40px) max(4vw,16px) 64px}
+.prog{display:flex;gap:4px;margin-bottom:20px}
+.prog span{flex:1;height:8px;border-radius:4px;background:var(--line);transition:background .25s}
+.prog span.done{background:var(--main)}.prog span.cur{background:var(--r4)}
+.qn{color:var(--mut);font-weight:600;margin:0 0 6px}
+.card{border:2px solid var(--line);border-radius:18px;padding:clamp(18px,3vw,32px);background:var(--bg)}
+.card h2{font-size:clamp(22px,3.4vw,30px);line-height:1.2;margin:0 0 20px;text-wrap:balance}
+.opts{display:grid;gap:12px}
+.opt{display:flex;align-items:center;gap:14px;width:100%;min-height:56px;padding:12px 16px;border:2px solid var(--line);border-radius:14px;background:var(--soft);color:var(--ink);font:600 17px/1.3 inherit;text-align:left;cursor:pointer;transition:border-color .15s,transform .15s}
+.opt:hover{border-color:var(--main)}
+.opt:focus-visible,.btn:focus-visible{outline:3px solid var(--r4);outline-offset:2px}
+.opt b{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--bg);border:2px solid var(--line);font-weight:800}
+.opt.sel{border-color:var(--main);background:var(--main);color:#fff}
+.opt.sel b{background:#fff;color:var(--main);border-color:#fff}
+.nav{display:flex;justify-content:space-between;gap:12px;margin-top:20px;flex-wrap:wrap}
+.btn{min-height:48px;padding:10px 22px;border-radius:12px;border:2px solid var(--main);background:var(--main);color:#fff;font:700 16px inherit;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--main)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.hint{color:var(--mut);font-size:14px;margin:14px 0 0}
+.score{display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:center;margin-bottom:28px}
+.big{font-size:clamp(64px,14vw,112px);font-weight:800;line-height:1;color:var(--main);white-space:nowrap}
+.big small{font-size:.38em;color:var(--mut)}
+.score h2{font-size:clamp(24px,4vw,32px);line-height:1.15;margin:0 0 6px;text-wrap:balance}
+.score p{margin:0;color:var(--mut)}
+@media(max-width:520px){.score{grid-template-columns:1fr;gap:8px}}
+.bars{display:grid;gap:10px;margin:0 0 32px}
+.bar{display:grid;grid-template-columns:9.5em minmax(0,1fr) 3.5em;gap:10px;align-items:center;font-size:15px}
+.bar .t{height:22px;background:var(--soft);border-radius:11px;overflow:hidden}
+.bar .t i{display:block;height:100%;border-radius:11px;width:0;transition:width .9s ease}
+.bar .v{text-align:right;font-weight:700;white-space:nowrap}
+@media(max-width:520px){.bar{grid-template-columns:7em minmax(0,1fr) 3em;font-size:14px}}
+h3{font-size:22px;margin:32px 0 12px}
+.cap{color:var(--mut);font-size:14px;margin:4px 0 0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:10px;margin-bottom:14px}
+.stat{background:var(--soft);border-radius:14px;padding:14px 16px}
+.stat b{display:block;font-size:clamp(24px,4vw,30px);line-height:1.1;color:var(--main);white-space:nowrap}
+.stat span{font-size:14px;color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:8px}
+.grid a{display:grid;place-items:center;min-height:52px;border-radius:12px;font-weight:800;text-decoration:none;font-size:17px}
+.grid a.ok{background:var(--okb);color:var(--ok);border:2px solid var(--ok)}
+.grid a.no{background:var(--badb);color:var(--bad);border:2px solid var(--bad)}
+.ex{border:2px solid var(--line);border-radius:16px;padding:18px 20px;margin-bottom:14px;scroll-margin-top:16px}
+.ex.ok{border-left:8px solid var(--ok)}.ex.no{border-left:8px solid var(--bad)}
+.ex h4{margin:0 0 10px;font-size:18px;line-height:1.3}
+.ex .ans{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;font-size:15px}
+.tag{padding:4px 10px;border-radius:8px;font-weight:600}
+.tag.ok{background:var(--okb);color:var(--ok)}.tag.no{background:var(--badb);color:var(--bad)}
+.ex p{margin:0 0 8px}
+.inst{display:inline-block;font-size:14px;color:var(--mut);border-top:1px solid var(--line);padding-top:8px;margin-top:4px}
+.note{color:var(--mut);font-size:14px;margin-top:28px}
+.note a{color:var(--main)}
+.hide{display:none}
+.foot{border-top:1px solid var(--line);padding:20px max(5vw,16px) 28px;text-align:center;color:var(--mut);font-size:14px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Faktomluva: test znalostí o světě</h1>
+  <p>13 otázek z knihy Hanse Roslinga. Odpověz podle sebe – na konci uvidíš, jak sis vedl ve srovnání se šimpanzem, který by tipoval náhodně.</p>
+  <div class="dots" aria-hidden="true">
+    <i style="width:64px;height:64px;background:var(--r1)"></i>
+    <i style="width:40px;height:40px;background:var(--r2);align-self:flex-end"></i>
+    <i style="width:84px;height:84px;background:var(--r3)"></i>
+    <i style="width:48px;height:48px;background:var(--r4);align-self:flex-start"></i>
+  </div>
+</header>
+
+<main>
+  <section id="quiz">
+    <div class="prog" id="prog"></div>
+    <p class="qn" id="qn"></p>
+    <div class="card">
+      <h2 id="qt"></h2>
+      <div class="opts" id="opts"></div>
+    </div>
+    <div class="nav">
+      <button class="btn ghost" id="back">Zpět</button>
+      <button class="btn" id="next" disabled>Další</button>
+    </div>
+    <p class="hint">Tip: odpovídat můžeš i klávesami A, B, C.</p>
+  </section>
+
+  <section id="res" class="hide">
+    <div class="score">
+      <div class="big" id="big"></div>
+      <div><h2 id="verdict"></h2><p id="sub"></p></div>
+    </div>
+    <div class="bars" id="bars"></div>
+
+    <h3>Jak jsi na tom ve srovnání se světem</h3>
+    <div class="stats" id="world"></div>
+    <p id="bias"></p>
+    <p class="cap">V roce 2017 dal tým Gapminder stejné otázky téměř 12 000 lidem ve 14 zemích (mj. Švédsko, Německo, Velká Británie, USA, Japonsko). Průměrně odpověděli správně na 2,2 z 12 otázek a šimpanze překonalo jen 10 % z nich.</p>
+
+    <h3>Souhrn odpovědí</h3>
+    <div class="grid" id="grid"></div>
+
+    <h3>Vysvětlení jednotlivých otázek</h3>
+    <div id="exp"></div>
+
+    <div class="nav"><button class="btn" id="again">Zkusit znovu</button></div>
+    <p class="note">Správné odpovědi a čísla odpovídají údajům v knize (vydání 2018, data OSN, Světové banky a dalších zdrojů). Aktuální verzi testu a data najdeš na <a href="https://www.gapminder.org">gapminder.org</a>.</p>
+  </section>
+</main>
+<footer class="foot">Created by L0cksm1thV · 2026</footer>
+
+<script>
+{
+const Q=[
+ {q:"Kolik dívek v zemích s nízkými příjmy dnes dokončí základní školu?",o:["20 %","40 %","60 %"],a:2,p:[0,1],
+  e:"Zhruba 60 %. Většina lidí tipuje mnohem méně, protože si chudé země představuje jako místa, kde se dívky do školy vůbec nedostanou. Ve skutečnosti se vzdělání dívek za posledních několik desetiletí výrazně zlepšilo.",i:"Instinkt propasti – svět nedělíme jen na „my“ a „oni“."},
+ {q:"Kde žije většina světové populace?",o:["V zemích s nízkými příjmy","V zemích se středními příjmy","V zemích s vysokými příjmy"],a:1,p:[0],
+  e:"Asi 75 % lidí žije v zemích se středními příjmy. Rosling proto místo dělení na „rozvinuté“ a „rozvojové“ země používá čtyři příjmové úrovně – a většina lidstva je na úrovni 2 a 3, tedy uprostřed.",i:"Instinkt propasti – mezi extrémy je většina."},
+ {q:"Jak se za posledních 20 let změnil podíl lidí žijících v extrémní chudobě?",o:["Skoro se zdvojnásobil","Zůstal zhruba stejný","Klesl skoro na polovinu"],a:2,p:[0,1],
+  e:"Klesl téměř na polovinu. Je to jedna z nejvýraznějších změn moderních dějin, ale málokdo o ní ví – postupné zlepšování se do zpráv nedostane, dramatická neštěstí ano.",i:"Negativní instinkt – špatných zpráv si všimneme víc než pomalého zlepšení."},
+ {q:"Jaká je dnes průměrná očekávaná délka života na světě?",o:["50 let","60 let","70 let"],a:2,p:[0,1],
+  e:"Kolem 72 let. Lidé často tipují nižší číslo, protože vycházejí ze starších představ o světě. Průměr táhnou nahoru hlavně velké země se středními příjmy, kde se zdravotní péče rychle zlepšila.",i:"Negativní instinkt – svět vidíme horší, než je."},
+ {q:"Dnes je na světě asi 2 miliardy dětí do 15 let. Kolik jich podle OSN bude v roce 2100?",o:["4 miliardy","3 miliardy","2 miliardy"],a:2,p:[0,1],
+  e:"Zhruba stejně – 2 miliardy. Počet dětí už přestal růst, protože v naprosté většině zemí rodiny mají méně dětí. Rosling tomu říká „vrchol počtu dětí“ (peak child).",i:"Instinkt přímky – ne každý trend roste donekonečna."},
+ {q:"OSN čeká, že do roku 2100 přibudou na světě další asi 4 miliardy lidí. Co je hlavní důvod?",o:["Bude víc dětí (do 15 let)","Bude víc dospělých (15–74 let)","Bude víc velmi starých lidí (75+)"],a:1,p:[0],
+  e:"Víc dospělých. Dnešní děti vyrostou a mladší generace se „doplní“ do věkových skupin, které jsou dnes méně početné. Populace tedy ještě poroste, i když počet dětí už neroste.",i:"Instinkt přímky – růst se zpomaluje a ustálí."},
+ {q:"Jak se za posledních 100 let změnil počet úmrtí na přírodní katastrofy za rok?",o:["Víc než se zdvojnásobil","Zůstal zhruba stejný","Klesl na méně než polovinu"],a:2,p:[0,1],
+  e:"Klesl na méně než polovinu – a to i přesto, že lidí na světě je několikanásobně víc. Za zlepšením stojí předpovědi počasí, lepší stavby, záchranné systémy a vyšší příjmy.",i:"Instinkt strachu – co je děsivé, nepovažujeme automaticky za časté."},
+ {q:"Na světě žije zhruba 7 miliard lidí. Jak jsou rozloženi (v miliardách)?",o:["Amerika 1, Evropa 1, Afrika 1, Asie 4","Amerika 2, Evropa 1, Afrika 1, Asie 3","Amerika 1, Evropa 2, Afrika 1, Asie 3"],a:0,p:[],
+  e:"Amerika 1, Evropa 1, Afrika 1, Asie 4 – Rosling tomu říká „PIN kód světa“ 1-1-1-4. Do konce století se podle OSN změní zhruba na 1-1-4-5: Afrika výrazně vyroste a těžiště světa se přesune.",i:"Instinkt velikosti – čísla je dobré vidět v poměru."},
+ {q:"Kolik ročních dětí na světě je dnes očkováno alespoň proti jedné nemoci?",o:["20 %","50 %","80 %"],a:2,p:[0,1],
+  e:"Více než 80 % (v knize 88 %). Očkování je dobrý ukazatel: aby se vakcíny dostaly k dětem, musí fungovat chladicí řetězec, doprava a základní zdravotnictví. Vypovídá tedy i o tom, jak daleko se svět dostal.",i:"Negativní instinkt a instinkt propasti."},
+ {q:"Třicetiletí muži na světě strávili ve škole v průměru 10 let. Kolik let ženy stejného věku?",o:["9 let","6 let","3 roky"],a:0,p:[1,2],
+  e:"Zhruba 9 let. Rozdíl mezi muži a ženami ve vzdělání se ve většině světa výrazně zmenšil, i když v nejchudších zemích stále přetrvává.",i:"Instinkt zobecňování – nejhorší příklady nejsou typické."},
+ {q:"V roce 1996 byli tygr, panda velká a nosorožec dvourohý zapsáni mezi ohrožené druhy. Kolik z nich je dnes ohroženo víc?",o:["Dva","Jeden","Žádný"],a:2,p:[0,1],
+  e:"Žádný. Všechny tři druhy jsou na tom dnes stejně nebo lépe než tehdy – i díky ochraně přírody. Neznamená to, že je vše v pořádku, ale že úsilí může fungovat.",i:"Instinkt strachu a negativní instinkt."},
+ {q:"Kolik lidí na světě má alespoň nějaký přístup k elektřině?",o:["20 %","50 %","80 %"],a:2,p:[0,1],
+  e:"Více než 80 % (v knize 85 %). Elektřina se rozšířila rychleji, než si většina lidí myslí – včetně venkovských oblastí, kam ji často přinesly solární panely.",i:"Instinkt propasti."},
+ {q:"Co čekají odborníci na klima od průměrné teploty v příštích 100 letech?",o:["Oteplí se","Zůstane stejná","Ochladí se"],a:0,p:[],
+  e:"Oteplí se. Na tuhle otázku lidé ve všech zemích odpovídají správně nejčastěji – o změně klimatu se mluví hodně. Rosling ukazuje, že tady problém není nevědomost; varuje ale před panikou a přeháněním, které vedou ke špatným rozhodnutím.",i:"Instinkt naléhavosti – dělej rozhodnutí s rozvahou, ne pod tlakem."}
+];
+const L=["A","B","C"];
+let cur=0, ans=Array(Q.length).fill(null);
+const $=id=>document.getElementById(id);
+
+function render(){
+  const q=Q[cur];
+  $("prog").innerHTML=Q.map((_,i)=>`<span class="${i===cur?'cur':ans[i]!==null?'done':''}"></span>`).join('');
+  $("qn").textContent=`Otázka ${cur+1} z ${Q.length}`;
+  $("qt").textContent=q.q;
+  $("opts").innerHTML=q.o.map((o,i)=>`<button class="opt${ans[cur]===i?' sel':''}" data-i="${i}"><b>${L[i]}</b><span>${o}</span></button>`).join('');
+  $("back").disabled=cur===0;
+  $("next").disabled=ans[cur]===null;
+  $("next").textContent=cur===Q.length-1?"Vyhodnotit":"Další";
+}
+function pick(i){ans[cur]=i;render();}
+$("opts").addEventListener("click",e=>{const b=e.target.closest(".opt");if(b)pick(+b.dataset.i);});
+$("back").addEventListener("click",()=>{if(cur>0){cur--;render();}});
+$("next").addEventListener("click",()=>{if(ans[cur]===null)return;if(cur<Q.length-1){cur++;render();}else results();});
+document.addEventListener("keydown",e=>{
+  if($("quiz").classList.contains("hide"))return;
+  const k=e.key.toUpperCase(),i=L.indexOf(k);
+  if(i>-1)pick(i);
+  else if(e.key==="Enter"&&ans[cur]!==null)$("next").click();
+});
+
+function results(){
+  const ok=Q.map((q,i)=>ans[i]===q.a), n=ok.filter(Boolean).length, pct=Math.round(n/Q.length*100);
+  $("quiz").classList.add("hide");$("res").classList.remove("hide");
+  const s12=ok.slice(0,12).filter(Boolean).length, p12=Math.round(s12/12*100);
+  const wrong=Q.map((q,i)=>i).filter(i=>!ok[i]), pess=wrong.filter(i=>Q[i].p.includes(ans[i])).length;
+  $("big").innerHTML=`${n}<small>/${Q.length}</small>`;
+  const V=s12>=12?["Plný počet – to ve studii nedokázal nikdo.","Z 12 000 lidí nikdo neodpověděl správně na všech 12 otázek. Tvůj obraz světa odpovídá faktům."]
+   :s12>=9?["Vidíš svět podle faktů.","Lepší výsledek ve studii měla jen hrstka lidí – jediný člověk (ze Švédska) zvládl 11 z 12."]
+   :s12>=5?["Překonal jsi šimpanze i 90 % lidí.","Jen každý desátý člověk ve studii trefil 5 a více otázek z 12. Přesto jsou místa, kde vidíš svět horší, než je."]
+   :s12>=3?["Tvé vidění světa je kritičtější, než odpovídá realitě – stejně jako u většiny lidí.","Jsi nad průměrem lidí ve studii, ale šimpanze, který tipuje náhodně, jsi ještě nepřekonal. Tak dopadlo 90 % dotázaných."]
+   :["Tvé vidění světa je velmi kritické – stejně jako u většiny světové populace.","Svět je na tom ve skutečnosti lépe, než si myslíš. Nejde o hloupost: lidé po celém světě odpovídají soustavně hůř než náhoda, protože mají v hlavě zastaralý a zkreslený obraz."];
+  $("verdict").textContent=V[0];
+  $("sub").textContent=V[1];
+  const B=[["Ty",p12,"var(--main)"],["Šimpanz (náhoda)",33,"var(--r4)"],["Průměr lidí",18,"var(--r3)"]];
+  $("bars").innerHTML=B.map(b=>`<div class="bar"><span>${b[0]}</span><div class="t"><i style="background:${b[2]}" data-w="${b[1]}"></i></div><span class="v">${b[1]} %</span></div>`).join('')
+   +`<p class="cap">Srovnání podle prvních 12 otázek: ty ${s12} z 12, šimpanz v průměru 4, lidé ve studii v průměru 2,2.</p>`;
+  $("world").innerHTML=`
+   <div class="stat"><b>${pct} %</b><span>tvoje úspěšnost ve všech 13 otázkách</span></div>
+   <div class="stat"><b>${s12>=5?'top 10 %':'90 %'}</b><span>${s12>=5?'patříš mezi 10 % lidí, kteří porazili šimpanze':'lidí ve studii šimpanze nepřekonalo – jsi mezi nimi'}</span></div>
+   <div class="stat"><b>${wrong.length?pess+' z '+wrong.length:'0'}</b><span>${wrong.length?'tvých chyb vidělo svět horší, než ve skutečnosti je':'chyb – žádné zkreslení'}</span></div>
+   <div class="stat"><b>${ok[12]?'✓':'✗'} 86 %</b><span>lidí správně odpovědělo na otázku o klimatu – ${ok[12]?'ty také':'ty ne'}</span></div>`;
+  $("bias").textContent=!wrong.length?"":pess/wrong.length>=.6
+   ?"Většina tvých chyb šla směrem k horšímu obrazu světa. To je přesně vzorec, který Rosling popsal: nejde o náhodné omyly, ale o soustavný pesimismus."
+   :"Tvoje chyby nejsou převážně pesimistické – spíš jde o mezery v datech než o zkreslený pohled na svět.";
+  requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll(".bar i").forEach(x=>x.style.width=x.dataset.w+"%")));
+  $("grid").innerHTML=Q.map((_,i)=>`<a href="#q${i+1}" class="${ok[i]?'ok':'no'}" aria-label="Otázka ${i+1}: ${ok[i]?'správně':'špatně'}">${i+1}</a>`).join('');
+  $("exp").innerHTML=Q.map((q,i)=>`<article class="ex ${ok[i]?'ok':'no'}" id="q${i+1}">
+    <h4>${i+1}. ${q.q}</h4>
+    <div class="ans">${ok[i]
+      ?`<span class="tag ok">✓ Správně: ${L[q.a]} – ${q.o[q.a]}</span>`
+      :`<span class="tag no">✗ Tvoje odpověď: ${L[ans[i]]} – ${q.o[ans[i]]}</span><span class="tag ok">Správně: ${L[q.a]} – ${q.o[q.a]}</span>`}</div>
+    <p>${q.e}</p><span class="inst">${q.i}</span></article>`).join('');
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+$("again").addEventListener("click",()=>{ans=Array(Q.length).fill(null);cur=0;$("res").classList.add("hide");$("quiz").classList.remove("hide");render();window.scrollTo({top:0});});
+render();
+}
+</script>
+</body>
+</html>
